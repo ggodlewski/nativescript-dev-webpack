@@ -35,7 +35,7 @@ export class WatchStateLoggerPlugin {
 
             process.send && process.send(messages.compilationComplete, error => null);
             // Send emitted files so they can be LiveSynced if need be
-            process.send && process.send({ emittedFiles }, error => null);
+            // process.send && process.send({ emittedFiles }, error => null);
         });
     }
 }

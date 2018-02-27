@@ -213,7 +213,7 @@ ProjectSnapshotGenerator.prototype.generate = function (generationOptions) {
     generationOptions = generationOptions || {};
 
     console.log("Running snapshot generation with the following arguments: ");
-    console.log(JSON.stringify(generationOptions, null, '\t'));
+    console.log(generationOptions);
 
     // Clean build folder
     shelljs.rm("-rf", this.getBuildPath());
@@ -257,9 +257,15 @@ ProjectSnapshotGenerator.prototype.generate = function (generationOptions) {
         }).then(() => {
             console.log("Snapshots build finished succesfully!");
 
-            if (generationOptions.install) {
+            if (generationOptions.install || true) {
                 ProjectSnapshotGenerator.cleanSnapshotArtefacts(this.options.projectRoot);
                 ProjectSnapshotGenerator.installSnapshotArtefacts(this.options.projectRoot);
+                debugger;
+                const emittedFiles = Object
+                .keys(generationOptions.compilation.assets)
+                .filter(assetKey => generationOptions.compilation.assets[assetKey].emitted);
+
+            process.send && process.send({ emittedFiles }, error => null);
                 console.log(generationOptions.useLibs ?
                     "Snapshot is included in the app as dynamically linked library (.so file)." :
                     "Snapshot is included in the app as binary .blob file. The more space-efficient option is to embed it in a dynamically linked library (.so file).");

@@ -48,7 +48,7 @@ exports.NativeScriptSnapshotPlugin = (function() {
         return resolve(this.getBuildPath(), "../tns-java-classes.js");
     }
 
-    NativeScriptSnapshotPlugin.prototype.generate = function (webpackChunk) {
+    NativeScriptSnapshotPlugin.prototype.generate = function (webpackChunk, compilation) {
         const options = this.options;
 
         const inputFile = join(options.webpackConfig.output.path, webpackChunk.files[0]);
@@ -64,7 +64,8 @@ exports.NativeScriptSnapshotPlugin = (function() {
             targetArchs: options.targetArchs,
             useLibs: options.useLibs,
             androidNdkPath: options.androidNdkPath,
-            tnsJavaClassesPath: join(preparedAppRootPath, "tns-java-classes.js")
+            tnsJavaClassesPath: join(preparedAppRootPath, "tns-java-classes.js"),
+            compilation
         }).then(() => {
             // Make the original file empty
             if (inputFile !== preprocessedInputFile) {
@@ -93,7 +94,7 @@ exports.NativeScriptSnapshotPlugin = (function() {
                 return callback();
             }
 
-            this.generate(chunkToSnapshot)
+            this.generate(chunkToSnapshot, compilation)
                 .then(() => {
                     console.log("Successfully generated snapshots!");
                     return callback();
