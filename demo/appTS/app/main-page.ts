@@ -7,6 +7,7 @@ logic, and to set up your page’s data binding.
 import { EventData } from 'data/observable';
 import { Page } from 'ui/page';
 import { HelloWorldModel } from './main-view-model';
+import * as frameModule from 'ui/frame';
 
 // Event handler for Page "navigatingTo" event attached in main-page.xml
 export function navigatingTo(args: EventData) {
@@ -28,4 +29,9 @@ export function navigatingTo(args: EventData) {
     https://docs.nativescript.org/core-concepts/data-binding.
     */
     page.bindingContext = new HelloWorldModel();
+}
+
+export function goToSecondPage(args) {
+    var topmost = frameModule.topmost();
+    topmost.navigate("views/second-page");
 }
