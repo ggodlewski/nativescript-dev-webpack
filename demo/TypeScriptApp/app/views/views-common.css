@@ -1,8 +1,1 @@
-Button {
-    width: 110;
-    height: 110;
-    border-width: 1;
-    border-color: darkgray;
-    background-color: lightgray;
-    border-radius: 55;
-}
+Button{width:110;height:110;border-width:1;border-color:darkgray;background-color:lightgray;border-radius:55}

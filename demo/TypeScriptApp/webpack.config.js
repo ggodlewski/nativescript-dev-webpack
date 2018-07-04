@@ -1,6 +1,13 @@
 const { join, relative, resolve, sep } = require("path");
 
 const webpack = require("webpack");
+
+const postcssImport = require("postcss-import")({
+    path: [
+        // "app"
+    ]
+});
+
 const nsWebpack = require("nativescript-dev-webpack");
 const nativescriptTarget = require("nativescript-dev-webpack/nativescript-target");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
@@ -44,6 +51,10 @@ module.exports = env => {
 
     const appFullPath = resolve(projectRoot, appPath);
     const appResourcesFullPath = resolve(projectRoot, appResourcesPath);
+    console.log("appFullPath", appFullPath);
+    console.log("appResourcesFullPath", appResourcesFullPath);
+    console.log("appResourcesPlatformDir", appResourcesPlatformDir);
+    console.log("dist", dist);
 
     const entryModule = nsWebpack.getEntryModule(appFullPath);
     const entryPath = `.${sep}${entryModule}.ts`;
@@ -78,9 +89,11 @@ module.exports = env => {
                 resolve(__dirname, "node_modules"),
                 "node_modules/tns-core-modules",
                 "node_modules",
+                appFullPath
             ],
             alias: {
-                '~': appFullPath
+                '~': appFullPath,
+                // '~/': join(appFullPath, "/")
             },
             // don't resolve symlinks to symlinked modules
             symlinks: false
@@ -98,7 +111,7 @@ module.exports = env => {
             "__dirname": false,
         },
         devtool: "none",
-        optimization:  {
+        optimization: {
             splitChunks: {
                 cacheGroups: {
                     vendor: {
@@ -107,7 +120,7 @@ module.exports = env => {
                         test: (module, chunks) => {
                             const moduleName = module.nameForCondition ? module.nameForCondition() : '';
                             return /[\\/]node_modules[\\/]/.test(moduleName) ||
-                                    appComponents.some(comp => comp === moduleName);
+                                appComponents.some(comp => comp === moduleName);
 
                         },
                         enforce: true,
@@ -153,13 +166,21 @@ module.exports = env => {
                     ].filter(loader => !!loader)
                 },
 
-                { test: /\.(html|xml)$/, use: "nativescript-dev-webpack/xml-namespace-loader"},
+                { test: /\.(html|xml)$/, use: "nativescript-dev-webpack/xml-namespace-loader" },
 
                 {
                     test: /\.css$/,
-                    use: { loader: "css-loader", options: { minimize: false, url: false } }
+                    use:
+                        [
+                            {
+                                loader: "css-loader", options: { minimize: false, url: true }
+                            },
+                            // , modules: true, importLoaders: 1
+                            // {
+                            //     loader: "postcss-loader", options: { plugins: [postcssImport,] }
+                            // }
+                        ]
                 },
-
                 {
                     test: /\.scss$/,
                     use: [
@@ -183,14 +204,14 @@ module.exports = env => {
                 "global.TNS_WEBPACK": "true",
             }),
             // Remove all files from the out dir.
-            new CleanWebpackPlugin([ `${dist}/**/*` ]),
+            new CleanWebpackPlugin([`${dist}/**/*`]),
             // Copy native app resources to out dir.
             new CopyWebpackPlugin([
-              {
-                from: `${appResourcesFullPath}/${appResourcesPlatformDir}`,
-                to: `${dist}/App_Resources/${appResourcesPlatformDir}`,
-                context: projectRoot
-              },
+                {
+                    from: `${appResourcesFullPath}/${appResourcesPlatformDir}`,
+                    to: `${dist}/App_Resources/${appResourcesPlatformDir}`,
+                    context: projectRoot
+                },
             ]),
             // Copy assets to out dir. Add your own globs as needed.
             new CopyWebpackPlugin([
